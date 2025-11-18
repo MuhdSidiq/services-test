@@ -496,4 +496,67 @@ async function updateGantifierStats(gantifier_id: string) {
   console.log(`Gantifier ${gantifier_id} stats updated: ${totalJobs} jobs, ${averageRating.toFixed(2)} avg rating`);
 }
 
+/**
+ * POST /api/job-orders/:id/trigger-matching
+ * Trigger gantifier matching manually (admin only)
+ *
+ * This endpoint allows admins to manually trigger the gantifier discovery
+ * and job offer creation workflow without going through payment gateway.
+ *
+ * Use cases:
+ * - Admin creates job orders manually
+ * - Prepaid packages
+ * - Retry failed matching
+ * - Testing purposes
+ */
+router.post(
+  '/:id/trigger-matching',
+  validateId,
+  asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { radius, payment_id } = req.body;
+
+    console.log(`[ADMIN-TRIGGER] Triggering manual matching for job order: ${id}`);
+
+    // Import the job matching service
+    const { triggerJobMatching, canTriggerMatching } = await import('../services/job-matching.service');
+
+    // Validate if job order can be matched
+    const validation = await canTriggerMatching(id);
+
+    if (!validation.canMatch) {
+      console.log(`[ADMIN-TRIGGER] ❌ Cannot trigger matching: ${validation.reason}`);
+      return res.status(400).json({
+        success: false,
+        error: 'Cannot trigger matching',
+        message: validation.reason
+      });
+    }
+
+    // Trigger the matching workflow
+    const result = await triggerJobMatching({
+      jobOrderId: id,
+      radius: radius ? parseInt(radius) : 20,
+      paymentId: payment_id
+    });
+
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        error: result.error,
+        message: result.message,
+        data: result.data
+      });
+    }
+
+    console.log(`[ADMIN-TRIGGER] ✅ Matching completed successfully`);
+
+    res.json({
+      success: true,
+      message: result.message,
+      data: result.data
+    });
+  })
+);
+
 export default router;

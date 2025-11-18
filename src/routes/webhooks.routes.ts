@@ -2,8 +2,7 @@ import { Router, Request, Response } from 'express';
 import { asyncHandler } from '../middleware/error-handler';
 import paymentService from '../services/payment.service';
 import accountService from '../services/account.service';
-import { findNearbyGantifiers } from '../services/gantifier-discovery.service';
-import { createJobOffers, sendOffersViaWhatsApp } from '../services/offer.service';
+import { triggerJobMatching } from '../services/job-matching.service';
 import { PrismaClient } from '../../app/generated/prisma';
 
 const prisma = new PrismaClient();
@@ -57,53 +56,27 @@ router.post(
             center_id: payment.center_id,
           });
 
-          // After successful payment, find nearby gantifiers and send offers
-          console.log('🔍 Starting gantifier discovery for job order:', payment.job_order_id);
+          // After successful payment, trigger gantifier matching
+          console.log('🔍 Triggering gantifier matching for job order:', payment.job_order_id);
 
           try {
-            // Get job order details
-            const jobOrder = await prisma.job_orders.findUnique({
-              where: { id: payment.job_order_id },
-              include: { centers: true }
+            // Use the job matching service to handle the complete workflow
+            const matchingResult = await triggerJobMatching({
+              jobOrderId: payment.job_order_id,
+              radius: 20, // 20KM radius
+              paymentId: payment.id
             });
 
-            if (!jobOrder) {
-              console.error('❌ Job order not found:', payment.job_order_id);
+            if (matchingResult.success) {
+              console.log('✅ Job matching completed successfully:', matchingResult.message);
+              console.log(`   - Gantifiers found: ${matchingResult.data?.gantifiersFound}`);
+              console.log(`   - Offers created: ${matchingResult.data?.offersCreated}`);
+              console.log(`   - Offers sent: ${matchingResult.data?.offersSent}`);
             } else {
-              // Find nearby gantifiers within 20KM radius
-              const nearbyGantifiers = await findNearbyGantifiers(
-                jobOrder.center_location,
-                jobOrder.scheduled_date.toISOString(),
-                20 // 20KM radius
-              );
-
-              console.log(`✅ Found ${nearbyGantifiers.length} nearby gantifiers`);
-
-              if (nearbyGantifiers.length > 0) {
-                // Create job offers for discovered gantifiers
-                const offers = await createJobOffers(payment.job_order_id, nearbyGantifiers);
-
-                console.log(`✅ Created ${offers.length} job offers`);
-
-                // Send WhatsApp notifications to gantifiers
-                const sendResults = await sendOffersViaWhatsApp(offers);
-
-                const successCount = sendResults.filter(r => r.success).length;
-                console.log(`✅ Sent ${successCount}/${offers.length} WhatsApp job offers`);
-
-                // Update job order status to AWAITING_GANTIFIER_RESPONSE
-                await prisma.job_orders.update({
-                  where: { id: payment.job_order_id },
-                  data: { status: 'AWAITING_GANTIFIER_RESPONSE' }
-                });
-
-                console.log('✅ Job order status updated to AWAITING_GANTIFIER_RESPONSE');
-              } else {
-                console.log('⚠️ No nearby gantifiers found for this job');
-              }
+              console.log('⚠️ Job matching failed:', matchingResult.message);
             }
           } catch (gantifierError: any) {
-            console.error('❌ Error in gantifier discovery workflow:', gantifierError.message);
+            console.error('❌ Error in gantifier matching workflow:', gantifierError.message);
             // Don't fail the webhook if gantifier discovery fails
             // The payment has already been processed successfully
           }
