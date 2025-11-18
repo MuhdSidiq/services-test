@@ -25,6 +25,7 @@ import paymentActionsRoutes from './routes/payment-actions.routes';
 import authRoutes from './routes/auth.routes';
 import offersRoutes from './routes/offers.routes';
 import whatsappRoutes from './routes/whatsapp.routes';
+import invoicesRoutes from './routes/invoices.routes';
 
 const app = express();
 
@@ -90,6 +91,7 @@ app.use('/api/payment-actions', paymentActionsRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/offers', offersRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
+app.use('/api/invoices', invoicesRoutes);
 
 // 404 handler
 app.use((_req: express.Request, res: express.Response) => {
@@ -136,6 +138,10 @@ app.use((_req: express.Request, res: express.Response) => {
         getOfferByToken: 'GET /api/offers/:token',
         acceptOffer: 'GET /api/offers/:token/accept',
         rejectOffer: 'GET /api/offers/:token/reject'
+      },
+      invoices: {
+        downloadInvoice: 'GET /api/invoices/job-order/:job_order_id/download',
+        previewInvoice: 'GET /api/invoices/job-order/:job_order_id/preview'
       }
     }
   });
