@@ -38,6 +38,68 @@ router.post(
 );
 
 /**
+ * POST /api/payment-actions/create-admin-manual-payment
+ * Create a manual payment record for admin-created job orders
+ *
+ * This endpoint creates a payment record without Billplz integration
+ * for admin-initiated job orders. The payment is marked as PAID immediately
+ * and can be used for tracking purposes.
+ *
+ * Use cases:
+ * - Admin creates job orders manually
+ * - Prepaid packages
+ * - Offline payments
+ * - Testing purposes
+ */
+router.post(
+  '/create-admin-manual-payment',
+  validateRequired(['job_order_id', 'center_id', 'gantifier_fee', 'service_fee']),
+  asyncHandler(async (req: Request, res: Response) => {
+    const { job_order_id, center_id, gantifier_fee, service_fee, description } = req.body;
+
+    // Import prisma
+    const { PrismaClient } = await import('../../app/generated/prisma');
+    const prisma = new PrismaClient();
+
+    try {
+      // Calculate total amount
+      const total_amount = parseFloat(gantifier_fee) + parseFloat(service_fee);
+
+      // Create payment record marked as PAID with ADMIN_MANUAL method
+      const payment = await prisma.payments.create({
+        data: {
+          job_order_id,
+          center_id,
+          gantifier_fee: parseFloat(gantifier_fee),
+          service_fee: parseFloat(service_fee),
+          total_amount,
+          currency: 'MYR',
+          payment_method: 'ADMIN_MANUAL',
+          status: 'PAID',
+          paid_at: new Date(),
+          description: description || `Admin manual payment for job order ${job_order_id}`,
+          reference_number: `ADMIN-${Date.now()}`
+        },
+        include: {
+          job_orders: true,
+          centers: true,
+        },
+      });
+
+      console.log(`[ADMIN-PAYMENT] ✅ Created admin manual payment: ${payment.id}`);
+
+      res.status(201).json({
+        success: true,
+        data: payment,
+        message: 'Admin manual payment created successfully. You can now trigger matching.',
+      });
+    } finally {
+      await prisma.$disconnect();
+    }
+  })
+);
+
+/**
  * POST /api/payment-actions/hold-payment
  * Hold payment amount in account (called after payment confirmation)
  */

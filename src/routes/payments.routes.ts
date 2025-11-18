@@ -560,30 +560,6 @@ router.patch(
 );
 
 /**
- * PATCH /api/payments/:id/mark-paid
- * Mark payment as paid (shortcut endpoint)
- */
-router.patch(
-  '/:id/mark-paid',
-  validateId,
-  asyncHandler(async (req: Request, res: Response) => {
-    const payment = await prisma.payments.update({
-      where: { id: req.params.id },
-      data: {
-        status: 'PAID',
-        paid_at: new Date(),
-      },
-      include: {
-        job_orders: true,
-        centers: true,
-      },
-    });
-
-    res.json(payment);
-  })
-);
-
-/**
  * PATCH /api/payments/:id/mark-failed
  * Mark payment as failed (shortcut endpoint)
  */
