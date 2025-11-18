@@ -972,4 +972,137 @@ router.post('/center/signup/complete', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/auth/request-login-otp:
+ *   post:
+ *     summary: Request OTP for login (existing users)
+ *     description: Send WhatsApp OTP to existing user's phone number for login. No authentication required.
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - phone
+ *             properties:
+ *               phone:
+ *                 type: string
+ *                 description: Malaysian phone number (60XXXXXXXXX format)
+ *                 example: "60123456789"
+ *     responses:
+ *       200:
+ *         description: OTP sent successfully (always returns success for security)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "If an account exists with this phone, OTP has been sent. Valid for 5 minutes."
+ *       400:
+ *         description: Invalid phone number format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.post('/request-login-otp', async (req: Request, res: Response) => {
+  try {
+    const { phone } = req.body;
+
+    // Validate phone number
+    if (!phone) {
+      return res.status(400).json({
+        success: false,
+        error: 'Phone number is required'
+      });
+    }
+
+    if (!validateMalaysianPhone(phone)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid Malaysian phone number format. Use format: 60XXXXXXXXX'
+      });
+    }
+
+    console.log('Login OTP request for phone:', phone);
+
+    // Check if user exists
+    const existingUser = await prisma.users.findUnique({
+      where: { phone }
+    });
+
+    // For security, always return success even if user doesn't exist
+    // This prevents phone number enumeration attacks
+    if (!existingUser) {
+      console.log('User not found for phone:', phone, '(returning success for security)');
+      return res.status(200).json({
+        success: true,
+        message: 'If an account exists with this phone, OTP has been sent. Valid for 5 minutes.'
+      });
+    }
+
+    // Generate OTP
+    const otpCode = generateOTP();
+    const expiryMinutes = 5;
+
+    console.log('Generated OTP for login:', { phone, otpCode }); // Remove in production
+
+    // Store OTP in database
+    const storeResult = await storeOTP(phone, otpCode, expiryMinutes);
+
+    if (!storeResult.success) {
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to generate OTP',
+        details: storeResult.error
+      });
+    }
+
+    // Send OTP via WhatsApp
+    const { sendAuthenticationOtp } = await import('../lib/whatsapp/templates');
+    const whatsappResult = await sendAuthenticationOtp(phone, {
+      otpCode,
+      expiryMinutes: expiryMinutes.toString()
+    });
+
+    if (!whatsappResult.success) {
+      console.error('Failed to send WhatsApp OTP:', whatsappResult.error);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to send OTP via WhatsApp',
+        details: whatsappResult.error
+      });
+    }
+
+    console.log('Login OTP sent successfully via WhatsApp to:', phone);
+
+    return res.status(200).json({
+      success: true,
+      message: 'If an account exists with this phone, OTP has been sent. Valid for 5 minutes.'
+    });
+
+  } catch (error) {
+    console.error('Error in request-login-otp:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 export default router;

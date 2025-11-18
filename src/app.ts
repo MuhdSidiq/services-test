@@ -27,6 +27,7 @@ import offersRoutes from './routes/offers.routes';
 import whatsappRoutes from './routes/whatsapp.routes';
 import invoicesRoutes from './routes/invoices.routes';
 import analyticsRoutes from './routes/analytics.routes';
+import quickOrderRoutes from './routes/quick-order.routes';
 
 const app = express();
 
@@ -94,6 +95,7 @@ app.use('/api/offers', offersRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
 app.use('/api/invoices', invoicesRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/quick-order', quickOrderRoutes);
 
 // 404 handler
 app.use((_req: express.Request, res: express.Response) => {
@@ -130,6 +132,7 @@ app.use((_req: express.Request, res: express.Response) => {
       },
       auth: {
         login: 'POST /api/auth/login',
+        requestLoginOtp: 'POST /api/auth/request-login-otp',
         verifyOtp: 'POST /api/auth/verify-otp',
         magicLink: 'POST /api/auth/magic-link',
         verifyMagicLink: 'GET/POST /api/auth/verify-magic-link',
@@ -153,6 +156,10 @@ app.use((_req: express.Request, res: express.Response) => {
         gantifiers: 'GET /api/analytics/gantifiers',
         gantifierById: 'GET /api/analytics/gantifiers/:gantifier_id',
         aggregate: 'POST /api/analytics/aggregate (Admin)'
+      },
+      quickOrder: {
+        checkPhone: 'POST /api/quick-order/check-phone',
+        create: 'POST /api/quick-order/create'
       }
     }
   });
