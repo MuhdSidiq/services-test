@@ -1,0 +1,576 @@
+/**
+ * Full Cycle Test Script
+ * Tests the complete workflow from job order creation to completion
+ *
+ * Workflow:
+ * 1. Create test center and gantifier users
+ * 2. Center creates job order
+ * 3. Center makes payment (simulated as paid)
+ * 4. System finds nearby gantifiers
+ * 5. System sends job offers via WhatsApp
+ * 6. Gantifier accepts offer
+ * 7. Job is marked as complete
+ * 8. Payment is released to gantifier
+ */
+
+import { PrismaClient } from '../../app/generated/prisma';
+import axios from 'axios';
+
+const prisma = new PrismaClient();
+const BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000';
+
+// Test data
+const TEST_CENTER_EMAIL = 'test-center@gantify.com';
+const TEST_GANTIFIER_EMAIL = 'test-gantifier@gantify.com';
+const TEST_CENTER_PHONE = '60123456001';
+const TEST_GANTIFIER_PHONE = '60123456002';
+
+// Kuala Lumpur coordinates (for testing)
+const KL_LOCATION = '3.139003,101.686855'; // Kuala Lumpur city center
+
+interface TestContext {
+  centerUser?: any;
+  gantifierUser?: any;
+  centerAccount?: any;
+  gantifierAccount?: any;
+  jobOrder?: any;
+  payment?: any;
+  offers?: any[];
+}
+
+const context: TestContext = {};
+
+/**
+ * Step 1: Setup test data
+ */
+async function setupTestData() {
+  console.log('\n📋 STEP 1: Setting up test data...\n');
+
+  try {
+    // Get or create roles
+    let centerRole = await prisma.roles.findFirst({ where: { name: 'CENTER' } });
+    if (!centerRole) {
+      centerRole = await prisma.roles.create({
+        data: {
+          id: 'role_center_test',
+          name: 'CENTER',
+          description: 'Childcare center role',
+        },
+      });
+      console.log('✅ Created CENTER role');
+    }
+
+    let gantifierRole = await prisma.roles.findFirst({ where: { name: 'GANTIFIER' } });
+    if (!gantifierRole) {
+      gantifierRole = await prisma.roles.create({
+        data: {
+          id: 'role_gantifier_test',
+          name: 'GANTIFIER',
+          description: 'Gantifier role',
+        },
+      });
+      console.log('✅ Created GANTIFIER role');
+    }
+
+    // Create test center user
+    context.centerUser = await prisma.users.upsert({
+      where: { email: TEST_CENTER_EMAIL },
+      update: {},
+      create: {
+        id: `user_center_${Date.now()}`,
+        email: TEST_CENTER_EMAIL,
+        phone: TEST_CENTER_PHONE,
+        name: 'Test Center',
+        roles: {
+          connect: { id: centerRole.id }
+        },
+        phoneVerified: true,
+        updated_at: new Date(),
+      },
+    });
+    console.log(`✅ Center user: ${context.centerUser.email}`);
+
+    // Create center profile
+    const centerProfile = await prisma.centers.upsert({
+      where: { userId: context.centerUser.id },
+      update: {},
+      create: {
+        id: `center_${Date.now()}`,
+        userId: context.centerUser.id,
+        name: 'Test Childcare Center',
+        address: 'Kuala Lumpur, Malaysia',
+        location: KL_LOCATION,
+        phone: TEST_CENTER_PHONE,
+        email: TEST_CENTER_EMAIL,
+      },
+    });
+    console.log(`✅ Center profile: ${centerProfile.name}`);
+
+    // Create center account
+    context.centerAccount = await prisma.accounts.upsert({
+      where: { center_id: centerProfile.id },
+      update: {},
+      create: {
+        id: `account_center_${Date.now()}`,
+        center_id: centerProfile.id,
+        balance: 0,
+        held_balance: 0,
+      },
+    });
+    console.log(`✅ Center account created with balance: RM ${context.centerAccount.balance}`);
+
+    // Create test gantifier user
+    context.gantifierUser = await prisma.users.upsert({
+      where: { email: TEST_GANTIFIER_EMAIL },
+      update: {},
+      create: {
+        id: `user_gantifier_${Date.now()}`,
+        email: TEST_GANTIFIER_EMAIL,
+        phone: TEST_GANTIFIER_PHONE,
+        name: 'Test Gantifier',
+        roles: {
+          connect: { id: gantifierRole.id }
+        },
+        phoneVerified: true,
+        updated_at: new Date(),
+      },
+    });
+    console.log(`✅ Gantifier user: ${context.gantifierUser.email}`);
+
+    // Create gantifier profile with selected cities near KL
+    const gantifierProfile = await prisma.gantifiers.upsert({
+      where: { userId: context.gantifierUser.id },
+      update: {},
+      create: {
+        id: `gantifier_${Date.now()}`,
+        userId: context.gantifierUser.id,
+        fullName: 'Ali Gantifier',
+        status: 'ACTIVE',
+        address: 'Kuala Lumpur, Malaysia',
+        currentAddress: 'Kuala Lumpur',
+        selectedCities: ['kuala_lumpur_kuala_lumpur', 'selangor_petaling_jaya'], // Cities near KL
+        averageRating: 4.5,
+        completionRate: 95.0,
+        totalJobsCompleted: 10,
+      },
+    });
+    console.log(`✅ Gantifier profile: ${gantifierProfile.fullName} (Cities: ${gantifierProfile.selectedCities})`);
+
+    // Create gantifier account
+    context.gantifierAccount = await prisma.accounts.upsert({
+      where: { gantifier_id: gantifierProfile.id },
+      update: {},
+      create: {
+        id: `account_gantifier_${Date.now()}`,
+        gantifier_id: gantifierProfile.id,
+        balance: 0,
+        held_balance: 0,
+      },
+    });
+    console.log(`✅ Gantifier account created with balance: RM ${context.gantifierAccount.balance}`);
+
+    console.log('\n✅ Test data setup complete!\n');
+  } catch (error) {
+    console.error('❌ Error setting up test data:', error);
+    throw error;
+  }
+}
+
+/**
+ * Step 2: Center creates job order
+ */
+async function createJobOrder() {
+  console.log('\n📋 STEP 2: Center creates job order...\n');
+
+  try {
+    // Get center profile
+    const centerProfile = await prisma.centers.findUnique({
+      where: { userId: context.centerUser.id },
+    });
+
+    const scheduledDate = new Date();
+    scheduledDate.setDate(scheduledDate.getDate() + 1); // Tomorrow
+
+    context.jobOrder = await prisma.jobOrders.create({
+      data: {
+        id: `job_${Date.now()}`,
+        centerId: centerProfile!.id,
+        centerLocation: KL_LOCATION,
+        scheduledDate: scheduledDate,
+        startTime: '09:00',
+        endTime: '17:00',
+        numberOfGantifiers: 1,
+        totalAmount: 150.00,
+        status: 'PENDING',
+        description: 'Need 1 gantifier for childcare assistance',
+      },
+    });
+
+    console.log(`✅ Job Order Created:`);
+    console.log(`   ID: ${context.jobOrder.id}`);
+    console.log(`   Location: ${context.jobOrder.centerLocation}`);
+    console.log(`   Date: ${context.jobOrder.scheduledDate.toDateString()}`);
+    console.log(`   Time: ${context.jobOrder.startTime} - ${context.jobOrder.endTime}`);
+    console.log(`   Amount: RM ${context.jobOrder.totalAmount}`);
+    console.log(`   Status: ${context.jobOrder.status}\n`);
+  } catch (error) {
+    console.error('❌ Error creating job order:', error);
+    throw error;
+  }
+}
+
+/**
+ * Step 3: Center makes payment (simulated as paid)
+ */
+async function simulatePayment() {
+  console.log('\n💳 STEP 3: Simulating payment...\n');
+
+  try {
+    // Create payment record
+    context.payment = await prisma.payments.create({
+      data: {
+        id: `payment_${Date.now()}`,
+        center_id: (await prisma.centers.findUnique({ where: { userId: context.centerUser.id } }))!.id,
+        job_order_id: context.jobOrder.id,
+        total_amount: context.jobOrder.totalAmount,
+        payment_method: 'BILLPLZ',
+        status: 'PENDING',
+        billplz_bill_id: `test_bill_${Date.now()}`,
+        billplz_url: 'https://test.billplz.com/test',
+      },
+    });
+
+    console.log(`✅ Payment created:`);
+    console.log(`   ID: ${context.payment.id}`);
+    console.log(`   Amount: RM ${context.payment.total_amount}`);
+    console.log(`   Billplz ID: ${context.payment.billplz_bill_id}\n`);
+
+    // Simulate Billplz webhook (payment successful)
+    console.log('🔔 Triggering Billplz webhook (payment successful)...\n');
+
+    const webhookData = {
+      id: context.payment.billplz_bill_id,
+      paid: 'true',
+      state: 'paid',
+      amount: String(Math.round(context.payment.total_amount * 100)), // Convert to cents
+    };
+
+    const response = await axios.post(`${BASE_URL}/api/webhooks/billplz`, webhookData);
+
+    console.log(`✅ Webhook response:`, response.data);
+
+    // Wait a bit for processing
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Verify payment status
+    const updatedPayment = await prisma.payments.findUnique({
+      where: { id: context.payment.id },
+    });
+
+    console.log(`✅ Payment status: ${updatedPayment?.status}`);
+
+    // Verify account hold
+    const updatedAccount = await prisma.accounts.findUnique({
+      where: { center_id: (await prisma.centers.findUnique({ where: { userId: context.centerUser.id } }))!.id },
+    });
+
+    console.log(`✅ Center account held balance: RM ${updatedAccount?.held_balance}\n`);
+  } catch (error) {
+    console.error('❌ Error simulating payment:', error);
+    throw error;
+  }
+}
+
+/**
+ * Step 4: Verify gantifier discovery and offers
+ */
+async function verifyGantifierDiscovery() {
+  console.log('\n🔍 STEP 4: Verifying gantifier discovery...\n');
+
+  try {
+    // Check job order status
+    const updatedJobOrder = await prisma.jobOrders.findUnique({
+      where: { id: context.jobOrder.id },
+    });
+
+    console.log(`✅ Job order status: ${updatedJobOrder?.status}`);
+
+    // Check job offers
+    context.offers = await prisma.jobOffers.findMany({
+      where: { jobOrderId: context.jobOrder.id },
+      include: {
+        gantifier: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+
+    console.log(`✅ Found ${context.offers.length} job offers`);
+
+    context.offers.forEach((offer, index) => {
+      console.log(`\n   Offer ${index + 1}:`);
+      console.log(`   - Gantifier: ${offer.gantifier.fullName}`);
+      console.log(`   - Status: ${offer.status}`);
+      console.log(`   - Acceptance Token: ${offer.acceptanceToken}`);
+      console.log(`   - Sent At: ${offer.sentAt}`);
+    });
+
+    console.log('');
+  } catch (error) {
+    console.error('❌ Error verifying gantifier discovery:', error);
+    throw error;
+  }
+}
+
+/**
+ * Step 5: Gantifier accepts offer
+ */
+async function gantifierAcceptsOffer() {
+  console.log('\n✅ STEP 5: Gantifier accepts offer...\n');
+
+  try {
+    if (!context.offers || context.offers.length === 0) {
+      console.log('⚠️  No offers to accept');
+      return;
+    }
+
+    const firstOffer = context.offers[0];
+    const acceptUrl = `${BASE_URL}/api/offers/${firstOffer.acceptanceToken}/accept`;
+
+    console.log(`🔗 Accept URL: ${acceptUrl}\n`);
+
+    const response = await axios.get(acceptUrl, {
+      maxRedirects: 0,
+      validateStatus: (status) => status >= 200 && status < 400,
+    });
+
+    console.log(`✅ Offer accepted!`);
+    console.log(`   Response:`, response.data);
+
+    // Wait a bit for processing
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Verify job order status
+    const updatedJobOrder = await prisma.jobOrders.findUnique({
+      where: { id: context.jobOrder.id },
+      include: {
+        gantifier: true,
+      },
+    });
+
+    console.log(`\n✅ Job order updated:`);
+    console.log(`   Status: ${updatedJobOrder?.status}`);
+    console.log(`   Assigned to: ${updatedJobOrder?.gantifier?.fullName || 'N/A'}\n`);
+  } catch (error: any) {
+    if (error.response?.status === 302) {
+      console.log(`✅ Offer accepted! (Redirected to: ${error.response.headers.location})\n`);
+    } else {
+      console.error('❌ Error accepting offer:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+}
+
+/**
+ * Step 6: Mark job as complete
+ */
+async function completeJob() {
+  console.log('\n🎉 STEP 6: Marking job as complete...\n');
+
+  try {
+    // Update job order status to COMPLETED
+    const completedJob = await prisma.jobOrders.update({
+      where: { id: context.jobOrder.id },
+      data: {
+        status: 'COMPLETED',
+        completedAt: new Date(),
+      },
+    });
+
+    console.log(`✅ Job marked as complete:`);
+    console.log(`   Job ID: ${completedJob.id}`);
+    console.log(`   Status: ${completedJob.status}`);
+    console.log(`   Completed At: ${completedJob.completedAt}\n`);
+  } catch (error) {
+    console.error('❌ Error completing job:', error);
+    throw error;
+  }
+}
+
+/**
+ * Step 7: Release payment to gantifier
+ */
+async function releasePayment() {
+  console.log('\n💰 STEP 7: Releasing payment to gantifier...\n');
+
+  try {
+    const centerProfile = await prisma.centers.findUnique({
+      where: { userId: context.centerUser.id },
+    });
+
+    const gantifierProfile = await prisma.gantifiers.findUnique({
+      where: { userId: context.gantifierUser.id },
+    });
+
+    const jobOrder = await prisma.jobOrders.findUnique({
+      where: { id: context.jobOrder.id },
+    });
+
+    // Use transaction to ensure atomicity
+    await prisma.$transaction(async (tx) => {
+      // 1. Release held amount from center account
+      await tx.accounts.update({
+        where: { center_id: centerProfile!.id },
+        data: {
+          held_balance: { decrement: jobOrder!.totalAmount },
+        },
+      });
+
+      // 2. Add amount to gantifier account
+      await tx.accounts.update({
+        where: { gantifier_id: gantifierProfile!.id },
+        data: {
+          balance: { increment: jobOrder!.totalAmount },
+        },
+      });
+
+      // 3. Record center transaction
+      await tx.accountTransactions.create({
+        data: {
+          id: `txn_center_${Date.now()}`,
+          account_id: context.centerAccount.id,
+          type: 'PAYMENT',
+          amount: -jobOrder!.totalAmount,
+          balance_after: 0,
+          held_balance_after: 0,
+          description: `Payment for job ${jobOrder!.id}`,
+          related_job_order_id: jobOrder!.id,
+        },
+      });
+
+      // 4. Record gantifier transaction
+      await tx.accountTransactions.create({
+        data: {
+          id: `txn_gantifier_${Date.now()}`,
+          account_id: context.gantifierAccount.id,
+          type: 'EARNING',
+          amount: jobOrder!.totalAmount,
+          balance_after: jobOrder!.totalAmount,
+          held_balance_after: 0,
+          description: `Payment received for job ${jobOrder!.id}`,
+          related_job_order_id: jobOrder!.id,
+        },
+      });
+
+      // 5. Update payment status
+      await tx.payments.update({
+        where: { id: context.payment.id },
+        data: { status: 'COMPLETED' },
+      });
+    });
+
+    // Get updated balances
+    const updatedCenterAccount = await prisma.accounts.findUnique({
+      where: { center_id: centerProfile!.id },
+    });
+
+    const updatedGantifierAccount = await prisma.accounts.findUnique({
+      where: { gantifier_id: gantifierProfile!.id },
+    });
+
+    console.log(`✅ Payment released successfully!`);
+    console.log(`\n   Center Account:`);
+    console.log(`   - Balance: RM ${updatedCenterAccount?.balance}`);
+    console.log(`   - Held: RM ${updatedCenterAccount?.held_balance}`);
+    console.log(`\n   Gantifier Account:`);
+    console.log(`   - Balance: RM ${updatedGantifierAccount?.balance}`);
+    console.log(`   - Held: RM ${updatedGantifierAccount?.held_balance}\n`);
+  } catch (error) {
+    console.error('❌ Error releasing payment:', error);
+    throw error;
+  }
+}
+
+/**
+ * Display final summary
+ */
+async function displaySummary() {
+  console.log('\n' + '='.repeat(60));
+  console.log('📊 FINAL SUMMARY');
+  console.log('='.repeat(60) + '\n');
+
+  const jobOrder = await prisma.jobOrders.findUnique({
+    where: { id: context.jobOrder.id },
+    include: {
+      center: true,
+      gantifier: true,
+    },
+  });
+
+  const payment = await prisma.payments.findUnique({
+    where: { id: context.payment.id },
+  });
+
+  const centerAccount = await prisma.accounts.findUnique({
+    where: { center_id: jobOrder!.centerId },
+  });
+
+  const gantifierAccount = await prisma.accounts.findUnique({
+    where: { gantifier_id: jobOrder!.gantifierId! },
+  });
+
+  console.log('Job Order:');
+  console.log(`  ✓ ID: ${jobOrder!.id}`);
+  console.log(`  ✓ Center: ${jobOrder!.center.name}`);
+  console.log(`  ✓ Gantifier: ${jobOrder!.gantifier?.fullName || 'N/A'}`);
+  console.log(`  ✓ Date: ${jobOrder!.scheduledDate.toDateString()}`);
+  console.log(`  ✓ Time: ${jobOrder!.startTime} - ${jobOrder!.endTime}`);
+  console.log(`  ✓ Amount: RM ${jobOrder!.totalAmount}`);
+  console.log(`  ✓ Status: ${jobOrder!.status}`);
+
+  console.log('\nPayment:');
+  console.log(`  ✓ Status: ${payment!.status}`);
+  console.log(`  ✓ Amount: RM ${payment!.total_amount}`);
+
+  console.log('\nAccounts:');
+  console.log(`  Center:`);
+  console.log(`    - Balance: RM ${centerAccount!.balance}`);
+  console.log(`    - Held: RM ${centerAccount!.held_balance}`);
+  console.log(`  Gantifier:`);
+  console.log(`    - Balance: RM ${gantifierAccount!.balance}`);
+  console.log(`    - Held: RM ${gantifierAccount!.held_balance}`);
+
+  console.log('\n' + '='.repeat(60));
+  console.log('✅ FULL CYCLE TEST COMPLETED SUCCESSFULLY!');
+  console.log('='.repeat(60) + '\n');
+}
+
+/**
+ * Main test runner
+ */
+async function runFullCycleTest() {
+  console.log('\n' + '='.repeat(60));
+  console.log('🚀 GANTIFY FULL CYCLE TEST');
+  console.log('='.repeat(60));
+
+  try {
+    await setupTestData();
+    await createJobOrder();
+    await simulatePayment();
+    await verifyGantifierDiscovery();
+    await gantifierAcceptsOffer();
+    await completeJob();
+    await releasePayment();
+    await displaySummary();
+  } catch (error) {
+    console.error('\n❌ TEST FAILED:', error);
+    process.exit(1);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+// Run the test
+runFullCycleTest();

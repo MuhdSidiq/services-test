@@ -1,0 +1,15 @@
+.env
+.env.local
+.claude
+node_modules
+DEPLOYMENT.md
+API_ENDPOINTS.md
+CLAUDE.md
+README.md
+test-job-offer.json
+dist/
+
+# Prisma generated client - commit the code, ignore large binaries
+app/generated/prisma/*.node
+app/generated/prisma/*.wasm
+app/generated/prisma/query_engine_bg.js

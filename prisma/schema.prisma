@@ -1,0 +1,352 @@
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../app/generated/prisma"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model centers {
+  id                  String                @id
+  name                String
+  email               String                @unique
+  phone               String
+  address             String
+  postcode            String
+  city                String
+  state               String
+  location            String?
+  created_at          DateTime              @default(now())
+  user_id             String
+  whatsapp_number     String
+  users               users                 @relation(fields: [user_id], references: [id])
+  job_orders          job_orders[]
+  accounts            accounts?
+  payments            payments[]
+  withdrawal_requests withdrawal_requests[]
+}
+
+model gantifiers {
+  id                       String            @id
+  address                  String
+  postcode                 String
+  status                   String            @default("INACTIVE")
+  last_updated             DateTime          @default(now())
+  average_rating           Float             @default(0)
+  completion_rate          Float             @default(0)
+  total_jobs_completed     Int               @default(0)
+  city                     String?
+  state                    String?
+  address_details          String?
+  citizenship              String
+  country                  String?
+  created_at               DateTime          @default(now())
+  current_address          String
+  ece_qualification        Boolean
+  education_level          String
+  email_verified_at        DateTime?
+  experience_with_children Boolean
+  full_name                String
+  gender                   Gender
+  ic_number                String?           @unique
+  last_minute_work         Boolean
+  passport_number          String?           @unique
+  phone_number_verified_at DateTime?
+  resume_path              String?
+  selected_cities          Json              @default("[]")
+  selected_states          Json              @default("[]")
+  updated_at               DateTime
+  user_id                  String            @unique
+  preferred_location       Json?
+  users                    users             @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  job_assignments          job_assignments[]
+  job_offers               job_offers[]
+  job_orders               job_orders[]
+  priority_scores          priority_scores[]
+}
+
+model job_assignments {
+  id                           String     @id
+  job_order_id                 String     @unique
+  gantifier_id                 String
+  token                        String     @unique
+  token_expires_at             DateTime
+  assigned_at                  DateTime   @default(now())
+  priority_score_at_assignment Int
+  gantifiers                   gantifiers @relation(fields: [gantifier_id], references: [id])
+  job_orders                   job_orders @relation(fields: [job_order_id], references: [id])
+}
+
+model job_offers {
+  id               String              @id
+  job_order_id     String
+  gantifier_id     String
+  status           String              @default("SENT")
+  sent_at          DateTime            @default(now())
+  delivered_at     DateTime?
+  read_at          DateTime?
+  responded_at     DateTime?
+  response         String?
+  acceptance_token String              @unique
+  is_accepted      JobOfferIsAccepted?
+  gantifiers       gantifiers          @relation(fields: [gantifier_id], references: [id])
+  job_orders       job_orders          @relation(fields: [job_order_id], references: [id])
+}
+
+model job_orders {
+  id                   String    @id
+  center_id            String
+  gantifier_id         String?
+  scheduled_date       DateTime
+  job_tasks            String[]
+  status               String    @default("PENDING")
+  created_at           DateTime  @default(now())
+  completed_at         DateTime?
+  client_feedback      String?
+  completion_rating    Int?
+  center_location      String
+  rate                 Float
+  custom_tasks         String[]  @default([])
+  gantify_service_fees Float     @default(10)
+  start_time           String
+  end_time             String
+
+  // Payment tracking fields
+  gantifier_fee  Decimal?         @db.Decimal(10, 2)
+  service_fee    Decimal          @default(10) @db.Decimal(10, 2)
+  total_cost     Decimal?         @db.Decimal(10, 2)
+  payment_status JobPaymentStatus @default(UNPAID)
+  held_at        DateTime?
+  deducted_at    DateTime?
+
+  job_assignments      job_assignments?
+  job_offers           job_offers[]
+  centers              centers                @relation(fields: [center_id], references: [id])
+  gantifiers           gantifiers?            @relation(fields: [gantifier_id], references: [id])
+  priority_scores      priority_scores[]
+  payments             payments?
+  account_transactions account_transactions[]
+}
+
+model priority_scores {
+  id           String     @id
+  job_order_id String
+  score        Int
+  created_at   DateTime   @default(now())
+  gantifier_id String
+  gantifiers   gantifiers @relation(fields: [gantifier_id], references: [id])
+  job_orders   job_orders @relation(fields: [job_order_id], references: [id])
+
+  @@unique([job_order_id, gantifier_id, created_at])
+}
+
+model roles {
+  id    String  @id
+  name  String  @unique
+  users users[]
+}
+
+model sessions {
+  id         String   @id
+  token      String   @unique
+  user_id    String
+  expires_at DateTime
+  created_at DateTime @default(now())
+  updated_at DateTime
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model users {
+  id                  String      @id
+  name                String
+  email               String?     @unique
+  password            String?
+  responsiveness      Float       @default(0.5)
+  acceptanceRate      Float       @default(0.5)
+  penaltyScore        Float       @default(0)
+  role_id             String?
+  created_at          DateTime    @default(now())
+  updated_at          DateTime
+  otpCode             String?
+  otpExpiresAt        DateTime?
+  phone               String?     @unique
+  phoneVerified       Boolean     @default(false)
+  magicLinkToken      String?
+  magicLinkExpiresAt  DateTime?
+  centers             centers[]
+  gantifiers          gantifiers?
+  sessions            sessions[]
+  roles               roles?      @relation(fields: [role_id], references: [id])
+}
+
+model accounts {
+  id                   String                 @id @default(uuid())
+  center_id            String                 @unique
+  balance              Decimal                @default(0) @db.Decimal(10, 2)
+  total_paid           Decimal                @default(0) @db.Decimal(10, 2)
+  total_completed      Decimal                @default(0) @db.Decimal(10, 2)
+  total_refunded       Decimal                @default(0) @db.Decimal(10, 2)
+  currency             String                 @default("MYR")
+  status               AccountStatus          @default(ACTIVE)
+  created_at           DateTime               @default(now())
+  updated_at           DateTime               @updatedAt
+  centers              centers                @relation(fields: [center_id], references: [id], onDelete: Cascade)
+  account_transactions account_transactions[]
+  withdrawal_requests  withdrawal_requests[]
+}
+
+model payments {
+  id                    String                 @id @default(uuid())
+  job_order_id          String                 @unique
+  center_id             String
+  gantifier_fee         Decimal                @db.Decimal(10, 2)
+  service_fee           Decimal                @db.Decimal(10, 2)
+  total_amount          Decimal                @db.Decimal(10, 2)
+  currency              String                 @default("MYR")
+  billplz_bill_id       String?                @unique
+  billplz_collection_id String?
+  billplz_url           String?
+  payment_method        String?                @default("billplz")
+  status                PaymentStatus          @default(PENDING)
+  paid_at               DateTime?
+  failed_at             DateTime?
+  failure_reason        String?
+  expired_at            DateTime?
+  description           String?
+  reference_number      String?
+  created_at            DateTime               @default(now())
+  updated_at            DateTime               @updatedAt
+  job_orders            job_orders             @relation(fields: [job_order_id], references: [id], onDelete: Cascade)
+  centers               centers                @relation(fields: [center_id], references: [id])
+  account_transactions  account_transactions[]
+}
+
+model account_transactions {
+  id               String                 @id @default(uuid())
+  account_id       String
+  transaction_type AccountTransactionType
+  amount           Decimal                @db.Decimal(10, 2)
+  balance_before   Decimal                @db.Decimal(10, 2)
+  balance_after    Decimal                @db.Decimal(10, 2)
+  payment_id       String?
+  job_order_id     String
+  description      String
+  metadata         Json?
+  created_at       DateTime               @default(now())
+  accounts         accounts               @relation(fields: [account_id], references: [id])
+  payments         payments?              @relation(fields: [payment_id], references: [id])
+  job_orders       job_orders             @relation(fields: [job_order_id], references: [id])
+
+  @@index([account_id, created_at])
+  @@index([transaction_type])
+}
+
+model withdrawal_requests {
+  id                  String           @id @default(uuid())
+  account_id          String
+  center_id           String
+  amount              Decimal          @db.Decimal(10, 2)
+  requested_balance   Decimal          @db.Decimal(10, 2)
+  bank_name           String?
+  bank_account_number String?
+  bank_account_name   String?
+  status              WithdrawalStatus @default(PENDING)
+  notes               String?
+  admin_notes         String?
+  requested_at        DateTime         @default(now())
+  processed_at        DateTime?
+  processed_by        String?
+  accounts            accounts         @relation(fields: [account_id], references: [id])
+  centers             centers          @relation(fields: [center_id], references: [id])
+
+  @@index([status, requested_at])
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  CLOSED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  EXPIRED
+  CANCELLED
+  REFUNDED
+  COMPLETED
+}
+
+enum AccountTransactionType {
+  HOLD
+  DEDUCT
+  REFUND
+  WITHDRAW
+  FEE
+}
+
+enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  PROCESSING
+  COMPLETED
+  REJECTED
+  CANCELLED
+}
+
+enum JobPaymentStatus {
+  UNPAID
+  HELD
+  COMPLETED
+  REFUNDED
+}
+
+enum GantifierStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  ON_JOB
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum JobOfferIsAccepted {
+  YES
+  NO
+  NOT_RESPONDED
+}
+
+enum JobOfferStatus {
+  SENT
+  DELIVERED
+  READ
+  ACCEPTED_BY_GANTIFIER
+  REJECTED_BY_GANTIFIER
+  CONFIRMED_BY_CENTER
+  REJECTED_BY_CENTER
+  SUPERSEDED
+  MISSED
+  EXPIRED
+}
+
+enum JobOrderStatus {
+  DRAFT
+  AWAITING_PAYMENT
+  PAYMENT_CONFIRMED
+  PENDING
+  AWAITING_GANTIFIER_RESPONSE
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED_BY_CENTER
+  CANCELLED_BY_GANTIFIER
+  CANCELLED_BY_SYSTEM
+}

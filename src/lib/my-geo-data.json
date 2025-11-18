@@ -1,0 +1,892 @@
+[
+    {
+        "id": "johor",
+        "name": "Johor",
+        "cities": [
+            {
+                "id": "johor_johor_bahru",
+                "name": "Johor Bahru",
+                "latitude": "1.503555",
+                "longitude": "103.7495586"
+            },
+            {
+                "id": "johor_muar",
+                "name": "Muar",
+                "latitude": "2.05",
+                "longitude": "102.5666667"
+            },
+            {
+                "id": "johor_batu_pahat",
+                "name": "Batu Pahat",
+                "latitude": "1.933333",
+                "longitude": "103"
+            },
+            {
+                "id": "johor_kluang",
+                "name": "Kluang",
+                "latitude": "2.0323472",
+                "longitude": "103.3190766"
+            },
+            {
+                "id": "johor_kota_tinggi",
+                "name": "Kota Tinggi",
+                "latitude": "1.816667",
+                "longitude": "103.966667"
+            },
+            {
+                "id": "johor_kulai",
+                "name": "Kulai",
+                "latitude": "1.6666667",
+                "longitude": "103.6"
+            },
+            {
+                "id": "johor_mersing",
+                "name": "Mersing",
+                "latitude": "2.316667",
+                "longitude": "103.716667"
+            },
+            {
+                "id": "johor_pontian",
+                "name": "Pontian",
+                "latitude": "1.5",
+                "longitude": "103.5"
+            },
+            {
+                "id": "johor_segamat",
+                "name": "Segamat",
+                "latitude": "2.5004914",
+                "longitude": "102.8156547"
+            },
+            {
+                "id": "johor_tangkak",
+                "name": "Tangkak",
+                "latitude": "2.25",
+                "longitude": "102.5833333"
+            },
+            {
+                "id": "johor_iskandar_puteri",
+                "name": "Iskandar Puteri",
+                "latitude": "1.4522711",
+                "longitude": "103.6144729"
+            }
+        ]
+    },
+    {
+        "id": "kedah",
+        "name": "Kedah",
+        "cities": [
+            {
+                "id": "kedah_alor_setar",
+                "name": "Alor Setar",
+                "latitude": "6.1231908",
+                "longitude": "100.3683962"
+            },
+            {
+                "id": "kedah_anak_bukit",
+                "name": "Anak Bukit",
+                "latitude": "6.1768627",
+                "longitude": "100.3696405"
+            },
+            {
+                "id": "kedah_baling",
+                "name": "Baling",
+                "latitude": "5.6729278",
+                "longitude": "100.9182038"
+            },
+            {
+                "id": "kedah_bandar_baharu",
+                "name": "Bandar Baharu",
+                "latitude": "5.1317132",
+                "longitude": "100.4958416"
+            },
+            {
+                "id": "kedah_kota_setar",
+                "name": "Kota Setar",
+                "latitude": "6.122603",
+                "longitude": "100.3690317"
+            },
+            {
+                "id": "kedah_kuala_muda",
+                "name": "Kuala Muda",
+                "latitude": "5.7073152",
+                "longitude": "100.4952892"
+            },
+            {
+                "id": "kedah_kubang_pasu",
+                "name": "Kubang Pasu",
+                "latitude": "6.3356376",
+                "longitude": "100.3723218"
+            },
+            {
+                "id": "kedah_kulim",
+                "name": "Kulim",
+                "latitude": "5.3663769",
+                "longitude": "100.5525705"
+            },
+            {
+                "id": "kedah_langkawi",
+                "name": "Langkawi",
+                "latitude": "6.3700386",
+                "longitude": "99.7928634"
+            },
+            {
+                "id": "kedah_padang_terap",
+                "name": "Padang Terap",
+                "latitude": "6.2566513",
+                "longitude": "100.6645805"
+            },
+            {
+                "id": "kedah_pendang",
+                "name": "Pendang",
+                "latitude": "5.992427",
+                "longitude": "100.4776159"
+            },
+            {
+                "id": "kedah_pokok_sena",
+                "name": "Pokok Sena",
+                "latitude": "6.1673132",
+                "longitude": "100.5174321"
+            },
+            {
+                "id": "kedah_sik",
+                "name": "Sik",
+                "latitude": "5.8188544",
+                "longitude": "100.7442773"
+            },
+            {
+                "id": "kedah_yan",
+                "name": "Yan",
+                "latitude": "5.8482755",
+                "longitude": "100.4151899"
+            },
+            {
+                "id": "kedah_sungai_petani",
+                "name": "Sungai Petani",
+                "latitude": "5.6435195",
+                "longitude": "100.4869513"
+            }
+        ]
+    },
+    {
+        "id": "kelantan",
+        "name": "Kelantan",
+        "cities": [
+            {
+                "id": "kelantan_kota_bharu",
+                "name": "Kota Bharu",
+                "latitude": "6.12584",
+                "longitude": "102.2399785"
+            },
+            {
+                "id": "kelantan_kubang_kerian",
+                "name": "Kubang Kerian",
+                "latitude": "6.0940366",
+                "longitude": "102.2845137"
+            },
+            {
+                "id": "kelantan_pasir_mas",
+                "name": "Pasir Mas",
+                "latitude": "6.0416128",
+                "longitude": "102.1429248"
+            },
+            {
+                "id": "kelantan_tumpat",
+                "name": "Tumpat",
+                "latitude": "6.176396",
+                "longitude": "102.1663281"
+            },
+            {
+                "id": "kelantan_bachok",
+                "name": "Bachok",
+                "latitude": "6.0616322",
+                "longitude": "102.4008505"
+            },
+            {
+                "id": "kelantan_tanah_merah",
+                "name": "Tanah Merah",
+                "latitude": "5.7663046",
+                "longitude": "102.0341478"
+            },
+            {
+                "id": "kelantan_pasir_puteh",
+                "name": "Pasir Puteh",
+                "latitude": "5.8346168",
+                "longitude": "102.3829644"
+            },
+            {
+                "id": "kelantan_kuala_krai",
+                "name": "Kuala Krai",
+                "latitude": "5.4246182",
+                "longitude": "102.1522508"
+            },
+            {
+                "id": "kelantan_machang",
+                "name": "Machang",
+                "latitude": "5.7641131",
+                "longitude": "102.214217"
+            },
+            {
+                "id": "kelantan_gua_musang",
+                "name": "Gua Musang",
+                "latitude": "5.0198136",
+                "longitude": "102.0382663"
+            },
+            {
+                "id": "kelantan_jeli",
+                "name": "Jeli",
+                "latitude": "5.6955226",
+                "longitude": "101.8449367"
+            }
+        ]
+    },
+    {
+        "id": "malacca",
+        "name": "Malacca",
+        "cities": [
+            {
+                "id": "malacca_malacca_city",
+                "name": "Malacca City",
+                "latitude": "2.1942647",
+                "longitude": "102.2486651"
+            },
+            {
+                "id": "malacca_alor_gajah",
+                "name": "Alor Gajah",
+                "latitude": "2.3834528",
+                "longitude": "102.2107805"
+            },
+            {
+                "id": "malacca_jasin",
+                "name": "Jasin",
+                "latitude": "2.3058097",
+                "longitude": "102.422339"
+            },
+            {
+                "id": "malacca_melaka_tengah",
+                "name": "Melaka Tengah",
+                "latitude": "2.2301451",
+                "longitude": "102.2453068"
+            }
+        ]
+    },
+    {
+        "id": "negeri_sembilan",
+        "name": "Negeri Sembilan",
+        "cities": [
+            {
+                "id": "negeri_sembilan_seremban",
+                "name": "Seremban",
+                "latitude": "2.718407",
+                "longitude": "101.94106957295432"
+            },
+            {
+                "id": "negeri_sembilan_seri_menanti",
+                "name": "Seri Menanti",
+                "latitude": "2.6981369",
+                "longitude": "102.1614016"
+            },
+            {
+                "id": "negeri_sembilan_port_dickson",
+                "name": "Port Dickson",
+                "latitude": "2.5262491",
+                "longitude": "101.8106156"
+            },
+            {
+                "id": "negeri_sembilan_jempol",
+                "name": "Jempol",
+                "latitude": "2.8502724",
+                "longitude": "102.5081957"
+            },
+            {
+                "id": "negeri_sembilan_tampin",
+                "name": "Tampin",
+                "latitude": "2.4721537",
+                "longitude": "102.2323504"
+            },
+            {
+                "id": "negeri_sembilan_kuala_pilah",
+                "name": "Kuala Pilah",
+                "latitude": "2.7430758",
+                "longitude": "102.2154881"
+            },
+            {
+                "id": "negeri_sembilan_rembau",
+                "name": "Rembau",
+                "latitude": "2.5578923",
+                "longitude": "102.1081637"
+            },
+            {
+                "id": "negeri_sembilan_jelebu",
+                "name": "Jelebu",
+                "latitude": "3.0366264",
+                "longitude": "102.1179206"
+            }
+        ]
+    },
+    {
+        "id": "pahang",
+        "name": "Pahang",
+        "cities": [
+            {
+                "id": "pahang_kuantan",
+                "name": "Kuantan",
+                "latitude": "3.7985637",
+                "longitude": "103.32199"
+            },
+            {
+                "id": "pahang_pekan",
+                "name": "Pekan",
+                "latitude": "3.3781961",
+                "longitude": "103.2096122"
+            },
+            {
+                "id": "pahang_bera",
+                "name": "Bera",
+                "latitude": "3.2366738",
+                "longitude": "102.5417723"
+            },
+            {
+                "id": "pahang_bentong",
+                "name": "Bentong",
+                "latitude": "3.3624708",
+                "longitude": "102.0172675"
+            },
+            {
+                "id": "pahang_cameron_highlands",
+                "name": "Cameron Highlands",
+                "latitude": "4.4781546",
+                "longitude": "101.4833091"
+            },
+            {
+                "id": "pahang_jerantut",
+                "name": "Jerantut",
+                "latitude": "4.2834137",
+                "longitude": "102.5575232"
+            },
+            {
+                "id": "pahang_lipis",
+                "name": "Lipis",
+                "latitude": "4.3242506",
+                "longitude": "101.9085845"
+            },
+            {
+                "id": "pahang_maran",
+                "name": "Maran",
+                "latitude": "3.7529343500000003",
+                "longitude": "102.56540528763306"
+            },
+            {
+                "id": "pahang_raub",
+                "name": "Raub",
+                "latitude": "3.8843564",
+                "longitude": "101.7920275"
+            },
+            {
+                "id": "pahang_rompin",
+                "name": "Rompin",
+                "latitude": "2.8245772",
+                "longitude": "103.0993556"
+            },
+            {
+                "id": "pahang_temerloh",
+                "name": "Temerloh",
+                "latitude": "3.4505423",
+                "longitude": "102.4189"
+            }
+        ]
+    },
+    {
+        "id": "penang",
+        "name": "Penang",
+        "cities": [
+            {
+                "id": "penang_george_town",
+                "name": "George Town",
+                "latitude": "5.4141619",
+                "longitude": "100.3287352"
+            },
+            {
+                "id": "penang_alma_bukit_mertajam",
+                "name": "Alma, Bukit Mertajam"
+            },
+            {
+                "id": "penang_central_seberang_perai",
+                "name": "Central Seberang Perai",
+                "latitude": "5.3610703",
+                "longitude": "100.4573584"
+            },
+            {
+                "id": "penang_north_seberang_perai",
+                "name": "North Seberang Perai",
+                "latitude": "5.4992806",
+                "longitude": "100.4467987"
+            },
+            {
+                "id": "penang_northeast_penang_island",
+                "name": "Northeast Penang Island",
+                "latitude": "5.4103136",
+                "longitude": "100.2870311"
+            },
+            {
+                "id": "penang_south_seberan_perai",
+                "name": "South Seberan Perai"
+            },
+            {
+                "id": "penang_southwest_penang_island",
+                "name": "Southwest Penang Island",
+                "latitude": "5.3356587",
+                "longitude": "100.2389496"
+            }
+        ]
+    },
+    {
+        "id": "perak",
+        "name": "Perak",
+        "cities": [
+            {
+                "id": "perak_ipoh",
+                "name": "Ipoh",
+                "latitude": "4.5986817",
+                "longitude": "101.0900236"
+            },
+            {
+                "id": "perak_batang_padang",
+                "name": "Batang Padang",
+                "latitude": "4.0833333",
+                "longitude": "101.3333333"
+            },
+            {
+                "id": "perak_manjung",
+                "name": "Manjung",
+                "latitude": "4.334761",
+                "longitude": "100.6342662"
+            },
+            {
+                "id": "perak_kinta",
+                "name": "Kinta",
+                "latitude": "4.5833333",
+                "longitude": "101.0833333"
+            },
+            {
+                "id": "perak_kerian",
+                "name": "Kerian",
+                "latitude": "5.0345753",
+                "longitude": "100.4984585"
+            },
+            {
+                "id": "perak_kuala_kangsar",
+                "name": "Kuala Kangsar",
+                "latitude": "4.75",
+                "longitude": "100.9166667"
+            },
+            {
+                "id": "perak_larut_matang_and_selama",
+                "name": "Larut, Matang and Selama",
+                "latitude": "4.8598202",
+                "longitude": "100.8009593"
+            },
+            {
+                "id": "perak_hilir_perak",
+                "name": "Hilir Perak",
+                "latitude": "4",
+                "longitude": "101"
+            },
+            {
+                "id": "perak_hulu_perak",
+                "name": "Hulu Perak",
+                "latitude": "5.4479728",
+                "longitude": "101.2971493"
+            },
+            {
+                "id": "perak_perak_tengah",
+                "name": "Perak Tengah",
+                "latitude": "4.25",
+                "longitude": "100.9166667"
+            },
+            {
+                "id": "perak_kampar",
+                "name": "Kampar",
+                "latitude": "4.3",
+                "longitude": "101.15"
+            },
+            {
+                "id": "perak_muallim",
+                "name": "Muallim",
+                "latitude": "3.8333333",
+                "longitude": "101.5"
+            },
+            {
+                "id": "perak_bagan_datuk",
+                "name": "Bagan Datuk",
+                "latitude": "3.9166667",
+                "longitude": "100.9166667"
+            }
+        ]
+    },
+    {
+        "id": "perlis",
+        "name": "Perlis",
+        "cities": [
+            {
+                "id": "perlis_kangar",
+                "name": "Kangar",
+                "latitude": "6.4389312",
+                "longitude": "100.1944838"
+            },
+            {
+                "id": "perlis_arau",
+                "name": "Arau",
+                "latitude": "6.4307281",
+                "longitude": "100.2718795"
+            },
+            {
+                "id": "perlis_padang_besar",
+                "name": "Padang Besar",
+                "latitude": "6.6598773",
+                "longitude": "100.3164554"
+            }
+        ]
+    },
+    {
+        "id": "sabah",
+        "name": "Sabah",
+        "cities": [
+            {
+                "id": "sabah_kota_kinabalu",
+                "name": "Kota Kinabalu",
+                "latitude": "5.9780066",
+                "longitude": "116.0728988"
+            },
+            {
+                "id": "sabah_west_coast_division",
+                "name": "West Coast Division",
+                "latitude": "6.0150609",
+                "longitude": "116.56820156721864"
+            },
+            {
+                "id": "sabah_interior_division",
+                "name": "Interior Division",
+                "latitude": "4.749984",
+                "longitude": "116.1331579"
+            },
+            {
+                "id": "sabah_kudat_division",
+                "name": "Kudat Division",
+                "latitude": "6.833292",
+                "longitude": "117.1165498"
+            },
+            {
+                "id": "sabah_sandakan_division",
+                "name": "Sandakan Division",
+                "latitude": "5.5000133",
+                "longitude": "117.4998659"
+            },
+            {
+                "id": "sabah_tawau_division",
+                "name": "Tawau Division",
+                "latitude": "4.4999706",
+                "longitude": "117.9998686"
+            }
+        ]
+    },
+    {
+        "id": "sarawak",
+        "name": "Sarawak",
+        "cities": [
+            {
+                "id": "sarawak_kuching",
+                "name": "Kuching",
+                "latitude": "1.5574127",
+                "longitude": "110.3439862"
+            },
+            {
+                "id": "sarawak_sri_aman",
+                "name": "Sri Aman",
+                "latitude": "1.2097123",
+                "longitude": "111.28660915557279"
+            },
+            {
+                "id": "sarawak_sibu",
+                "name": "Sibu",
+                "latitude": "2.29220955",
+                "longitude": "111.87658661205317"
+            },
+            {
+                "id": "sarawak_miri",
+                "name": "Miri",
+                "latitude": "4.392739",
+                "longitude": "113.9880255"
+            },
+            {
+                "id": "sarawak_limbang",
+                "name": "Limbang",
+                "latitude": "4.3519985",
+                "longitude": "115.06024165665087"
+            },
+            {
+                "id": "sarawak_sarikei",
+                "name": "Sarikei",
+                "latitude": "2.1294846",
+                "longitude": "111.5230586"
+            },
+            {
+                "id": "sarawak_kapit",
+                "name": "Kapit",
+                "latitude": "2.0139027",
+                "longitude": "112.9356766"
+            },
+            {
+                "id": "sarawak_samarahan",
+                "name": "Samarahan",
+                "latitude": "1.434531",
+                "longitude": "110.46878425930076"
+            },
+            {
+                "id": "sarawak_bintulu",
+                "name": "Bintulu",
+                "latitude": "3.1874261",
+                "longitude": "113.0472803"
+            },
+            {
+                "id": "sarawak_betong",
+                "name": "Betong",
+                "latitude": "1.47972915",
+                "longitude": "111.47478700618396"
+            },
+            {
+                "id": "sarawak_mukah",
+                "name": "Mukah",
+                "latitude": "2.8929774",
+                "longitude": "112.0913318"
+            },
+            {
+                "id": "sarawak_serian",
+                "name": "Serian",
+                "latitude": "1.1136159",
+                "longitude": "110.61822106921089"
+            }
+        ]
+    },
+    {
+        "id": "selangor",
+        "name": "Selangor",
+        "cities": [
+            {
+                "id": "selangor_shah_alam",
+                "name": "Shah Alam",
+                "latitude": "3.0739429",
+                "longitude": "101.5185278"
+            },
+            {
+                "id": "selangor_klang",
+                "name": "Klang",
+                "latitude": "3.083333",
+                "longitude": "101.416667"
+            },
+            {
+                "id": "selangor_gombak",
+                "name": "Gombak",
+                "latitude": "3.2330444",
+                "longitude": "101.7145742"
+            },
+            {
+                "id": "selangor_hulu_langat",
+                "name": "Hulu Langat",
+                "latitude": "3.083333",
+                "longitude": "101.833333"
+            },
+            {
+                "id": "selangor_hulu_selangor",
+                "name": "Hulu Selangor",
+                "latitude": "3.5367441",
+                "longitude": "101.5949347"
+            },
+            {
+                "id": "selangor_kuala_langat",
+                "name": "Kuala Langat",
+                "latitude": "2.8365619",
+                "longitude": "101.4961821"
+            },
+            {
+                "id": "selangor_kuala_selangor",
+                "name": "Kuala Selangor",
+                "latitude": "3.3314558",
+                "longitude": "101.2513058"
+            },
+            {
+                "id": "selangor_petaling",
+                "name": "Petaling",
+                "latitude": "3.083333",
+                "longitude": "101.583333"
+            },
+            {
+                "id": "selangor_sabak_bernam",
+                "name": "Sabak Bernam",
+                "latitude": "3.711544",
+                "longitude": "101.1398739"
+            },
+            {
+                "id": "selangor_sepang",
+                "name": "Sepang",
+                "latitude": "2.8008619",
+                "longitude": "101.7094012"
+            }
+        ]
+    },
+    {
+        "id": "terengganu",
+        "name": "Terengganu",
+        "cities": [
+            {
+                "id": "terengganu_kuala_terengganu",
+                "name": "Kuala Terengganu",
+                "latitude": "5.3296461",
+                "longitude": "103.1383265"
+            },
+            {
+                "id": "terengganu_besut",
+                "name": "Besut",
+                "latitude": "5.5833333",
+                "longitude": "102.5"
+            },
+            {
+                "id": "terengganu_dungun",
+                "name": "Dungun",
+                "latitude": "4.7643972",
+                "longitude": "103.4184463"
+            },
+            {
+                "id": "terengganu_hulu_terengganu",
+                "name": "Hulu Terengganu",
+                "latitude": "4.910689",
+                "longitude": "102.7650701"
+            },
+            {
+                "id": "terengganu_kemaman",
+                "name": "Kemaman",
+                "latitude": "4.239674",
+                "longitude": "103.191429899754"
+            },
+            {
+                "id": "terengganu_marang",
+                "name": "Marang",
+                "latitude": "5.1666667",
+                "longitude": "103.1666667"
+            },
+            {
+                "id": "terengganu_setiu",
+                "name": "Setiu",
+                "latitude": "5.5500806",
+                "longitude": "102.7355111"
+            },
+            {
+                "id": "terengganu_kuala_nerus",
+                "name": "Kuala Nerus",
+                "latitude": "5.3333333",
+                "longitude": "103"
+            }
+        ]
+    },
+    {
+        "id": "kuala_lumpur",
+        "name": "Kuala Lumpur",
+        "cities": [
+            {
+                "id": "kuala_lumpur_kuala_lumpur",
+                "name": "Kuala Lumpur",
+                "latitude": "3.14079425",
+                "longitude": "101.69394124796918"
+            },
+            {
+                "id": "kuala_lumpur_bukit_bintang",
+                "name": "Bukit Bintang",
+                "latitude": "3.1471068",
+                "longitude": "101.7086011"
+            },
+            {
+                "id": "kuala_lumpur_titiwangsa",
+                "name": "Titiwangsa",
+                "latitude": "3.17317495",
+                "longitude": "101.69589516633849"
+            },
+            {
+                "id": "kuala_lumpur_setiawangsa",
+                "name": "Setiawangsa",
+                "latitude": "3.1827768",
+                "longitude": "101.7452477"
+            },
+            {
+                "id": "kuala_lumpur_wangsa_maju",
+                "name": "Wangsa Maju",
+                "latitude": "3.20577815",
+                "longitude": "101.7318614896659"
+            },
+            {
+                "id": "kuala_lumpur_batu",
+                "name": "Batu",
+                "latitude": "3.2018234",
+                "longitude": "101.6710223"
+            },
+            {
+                "id": "kuala_lumpur_kepong",
+                "name": "Kepong",
+                "latitude": "3.2140294",
+                "longitude": "101.634842"
+            },
+            {
+                "id": "kuala_lumpur_segambut",
+                "name": "Segambut",
+                "latitude": "3.1864418",
+                "longitude": "101.66419635834626"
+            },
+            {
+                "id": "kuala_lumpur_lembah_pantai",
+                "name": "Lembah Pantai",
+                "latitude": "3.101597",
+                "longitude": "101.6688966"
+            },
+            {
+                "id": "kuala_lumpur_seputeh",
+                "name": "Seputeh",
+                "latitude": "3.1136874",
+                "longitude": "101.68142"
+            },
+            {
+                "id": "kuala_lumpur_bandar_tun_razak",
+                "name": "Bandar Tun Razak",
+                "latitude": "3.0896257",
+                "longitude": "101.7124086"
+            },
+            {
+                "id": "kuala_lumpur_cheras",
+                "name": "Cheras",
+                "latitude": "3.0991919",
+                "longitude": "101.7374229"
+            }
+        ]
+    },
+    {
+        "id": "labuan",
+        "name": "Labuan",
+        "cities": [
+            {
+                "id": "labuan_victoria",
+                "name": "Victoria",
+                "latitude": "5.2769876",
+                "longitude": "115.2433556"
+            }
+        ]
+    },
+    {
+        "id": "putrajaya",
+        "name": "Putrajaya",
+        "cities": [
+            {
+                "id": "putrajaya_putrajaya",
+                "name": "Putrajaya",
+                "latitude": "2.9179726",
+                "longitude": "101.6840801"
+            }
+        ]
+    }
+]
