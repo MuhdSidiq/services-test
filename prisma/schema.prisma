@@ -10,62 +10,64 @@ datasource db {
 }
 
 model centers {
-  id                  String                @id
-  name                String
-  email               String                @unique
-  phone               String
-  address             String
-  postcode            String
-  city                String
-  state               String
-  location            String?
-  created_at          DateTime              @default(now())
-  user_id             String
-  whatsapp_number     String
-  users               users                 @relation(fields: [user_id], references: [id])
-  job_orders          job_orders[]
-  accounts            accounts?
-  payments            payments[]
-  withdrawal_requests withdrawal_requests[]
+  id                      String                    @id
+  name                    String
+  email                   String                    @unique
+  phone                   String
+  address                 String
+  postcode                String
+  city                    String
+  state                   String
+  location                String?
+  created_at              DateTime                  @default(now())
+  user_id                 String
+  whatsapp_number         String
+  users                   users                     @relation(fields: [user_id], references: [id])
+  job_orders              job_orders[]
+  accounts                accounts?
+  payments                payments[]
+  withdrawal_requests     withdrawal_requests[]
+  analytics_center_stats  analytics_center_stats[]
 }
 
 model gantifiers {
-  id                       String            @id
-  address                  String
-  postcode                 String
-  status                   String            @default("INACTIVE")
-  last_updated             DateTime          @default(now())
-  average_rating           Float             @default(0)
-  completion_rate          Float             @default(0)
-  total_jobs_completed     Int               @default(0)
-  city                     String?
-  state                    String?
-  address_details          String?
-  citizenship              String
-  country                  String?
-  created_at               DateTime          @default(now())
-  current_address          String
-  ece_qualification        Boolean
-  education_level          String
-  email_verified_at        DateTime?
-  experience_with_children Boolean
-  full_name                String
-  gender                   Gender
-  ic_number                String?           @unique
-  last_minute_work         Boolean
-  passport_number          String?           @unique
-  phone_number_verified_at DateTime?
-  resume_path              String?
-  selected_cities          Json              @default("[]")
-  selected_states          Json              @default("[]")
-  updated_at               DateTime
-  user_id                  String            @unique
-  preferred_location       Json?
-  users                    users             @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  job_assignments          job_assignments[]
-  job_offers               job_offers[]
-  job_orders               job_orders[]
-  priority_scores          priority_scores[]
+  id                         String                       @id
+  address                    String
+  postcode                   String
+  status                     String                       @default("INACTIVE")
+  last_updated               DateTime                     @default(now())
+  average_rating             Float                        @default(0)
+  completion_rate            Float                        @default(0)
+  total_jobs_completed       Int                          @default(0)
+  city                       String?
+  state                      String?
+  address_details            String?
+  citizenship                String
+  country                    String?
+  created_at                 DateTime                     @default(now())
+  current_address            String
+  ece_qualification          Boolean
+  education_level            String
+  email_verified_at          DateTime?
+  experience_with_children   Boolean
+  full_name                  String
+  gender                     Gender
+  ic_number                  String?                      @unique
+  last_minute_work           Boolean
+  passport_number            String?                      @unique
+  phone_number_verified_at   DateTime?
+  resume_path                String?
+  selected_cities            Json                         @default("[]")
+  selected_states            Json                         @default("[]")
+  updated_at                 DateTime
+  user_id                    String                       @unique
+  preferred_location         Json?
+  users                      users                        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  job_assignments            job_assignments[]
+  job_offers                 job_offers[]
+  job_orders                 job_orders[]
+  priority_scores            priority_scores[]
+  analytics_gantifier_stats  analytics_gantifier_stats[]
 }
 
 model job_assignments {
@@ -349,4 +351,146 @@ enum JobOrderStatus {
   CANCELLED_BY_CENTER
   CANCELLED_BY_GANTIFIER
   CANCELLED_BY_SYSTEM
+}
+
+// ========================================
+// ANALYTICS MODELS
+// ========================================
+
+model analytics_center_stats {
+  id                  String   @id @default(uuid())
+  center_id           String
+  period_start        DateTime
+  period_end          DateTime
+  period_type         PeriodType
+
+  // Job metrics
+  total_jobs          Int      @default(0)
+  completed_jobs      Int      @default(0)
+  cancelled_jobs      Int      @default(0)
+  pending_jobs        Int      @default(0)
+  in_progress_jobs    Int      @default(0)
+
+  // Financial metrics
+  total_spent         Decimal  @default(0) @db.Decimal(10, 2)
+  avg_job_cost        Decimal  @default(0) @db.Decimal(10, 2)
+  total_service_fees  Decimal  @default(0) @db.Decimal(10, 2)
+  total_gantifier_fees Decimal @default(0) @db.Decimal(10, 2)
+
+  // Performance metrics
+  avg_completion_time Float?   // in hours
+  completion_rate     Float?   // percentage
+  cancellation_rate   Float?   // percentage
+
+  // Engagement metrics
+  unique_gantifiers   Int      @default(0)
+  repeat_gantifiers   Int      @default(0)
+
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  centers             centers  @relation(fields: [center_id], references: [id], onDelete: Cascade)
+
+  @@unique([center_id, period_start, period_type])
+  @@index([center_id])
+  @@index([period_start])
+  @@index([period_type])
+  @@index([period_start, period_type])
+}
+
+model analytics_gantifier_stats {
+  id                    String   @id @default(uuid())
+  gantifier_id          String
+  period_start          DateTime
+  period_end            DateTime
+  period_type           PeriodType
+
+  // Job metrics
+  total_offers_received Int      @default(0)
+  total_offers_accepted Int      @default(0)
+  total_offers_declined Int      @default(0)
+  total_jobs_assigned   Int      @default(0)
+  completed_jobs        Int      @default(0)
+  cancelled_jobs        Int      @default(0)
+
+  // Financial metrics
+  total_earnings        Decimal  @default(0) @db.Decimal(10, 2)
+  avg_earnings_per_job  Decimal  @default(0) @db.Decimal(10, 2)
+
+  // Performance metrics
+  avg_rating            Float?
+  completion_rate       Float?   // percentage
+  acceptance_rate       Float?   // percentage
+  avg_response_time     Float?   // in minutes
+
+  // Engagement metrics
+  unique_centers        Int      @default(0)
+  repeat_centers        Int      @default(0)
+  active_days           Int      @default(0)
+
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+
+  gantifiers            gantifiers @relation(fields: [gantifier_id], references: [id], onDelete: Cascade)
+
+  @@unique([gantifier_id, period_start, period_type])
+  @@index([gantifier_id])
+  @@index([period_start])
+  @@index([period_type])
+  @@index([period_start, period_type])
+}
+
+model analytics_platform_stats {
+  id                       String   @id @default(uuid())
+  period_start             DateTime
+  period_end               DateTime
+  period_type              PeriodType
+
+  // Overall job metrics
+  total_jobs               Int      @default(0)
+  completed_jobs           Int      @default(0)
+  cancelled_jobs           Int      @default(0)
+  pending_jobs             Int      @default(0)
+  in_progress_jobs         Int      @default(0)
+
+  // User metrics
+  total_centers            Int      @default(0)
+  active_centers           Int      @default(0)
+  new_centers              Int      @default(0)
+  total_gantifiers         Int      @default(0)
+  active_gantifiers        Int      @default(0)
+  new_gantifiers           Int      @default(0)
+
+  // Financial metrics
+  total_revenue            Decimal  @default(0) @db.Decimal(10, 2)
+  total_service_fees       Decimal  @default(0) @db.Decimal(10, 2)
+  total_gantifier_fees     Decimal  @default(0) @db.Decimal(10, 2)
+  avg_transaction_value    Decimal  @default(0) @db.Decimal(10, 2)
+
+  // Engagement metrics
+  avg_jobs_per_center      Float?
+  avg_jobs_per_gantifier   Float?
+  platform_completion_rate Float?   // percentage
+  avg_platform_rating      Float?
+
+  // Matching metrics
+  avg_offers_per_job       Float?
+  avg_time_to_match        Float?   // in hours
+  match_success_rate       Float?   // percentage
+
+  created_at               DateTime @default(now())
+  updated_at               DateTime @updatedAt
+
+  @@unique([period_start, period_type])
+  @@index([period_start])
+  @@index([period_type])
+  @@index([period_start, period_type])
+}
+
+enum PeriodType {
+  DAY
+  WEEK
+  MONTH
+  QUARTER
+  YEAR
 }

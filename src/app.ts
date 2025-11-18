@@ -26,6 +26,7 @@ import authRoutes from './routes/auth.routes';
 import offersRoutes from './routes/offers.routes';
 import whatsappRoutes from './routes/whatsapp.routes';
 import invoicesRoutes from './routes/invoices.routes';
+import analyticsRoutes from './routes/analytics.routes';
 
 const app = express();
 
@@ -92,6 +93,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/offers', offersRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
 app.use('/api/invoices', invoicesRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // 404 handler
 app.use((_req: express.Request, res: express.Response) => {
@@ -142,6 +144,15 @@ app.use((_req: express.Request, res: express.Response) => {
       invoices: {
         downloadInvoice: 'GET /api/invoices/job-order/:job_order_id/download',
         previewInvoice: 'GET /api/invoices/job-order/:job_order_id/preview'
+      },
+      analytics: {
+        dashboard: 'GET /api/analytics/dashboard',
+        platform: 'GET /api/analytics/platform',
+        centers: 'GET /api/analytics/centers',
+        centerById: 'GET /api/analytics/centers/:center_id',
+        gantifiers: 'GET /api/analytics/gantifiers',
+        gantifierById: 'GET /api/analytics/gantifiers/:gantifier_id',
+        aggregate: 'POST /api/analytics/aggregate (Admin)'
       }
     }
   });
