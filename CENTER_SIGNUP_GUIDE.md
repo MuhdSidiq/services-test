@@ -323,24 +323,26 @@ INSERT INTO centers (
 
 ## WhatsApp Template Setup
 
-### Template Name: `authentication_otp`
+### Template Name: `gantify_authentication`
 
 **Category**: Authentication
 
-**Language**: English
+**Language**: English (US)
 
 **Template Content**:
 ```
-Your verification code is {{1}}.
+{{1}} is your verification code. For your security, do not share this code.
 
-This code will expire in {{2}} minutes. Please do not share this code with anyone.
+This code expires in 5 minutes.
 ```
 
 **Parameters**:
 - `{{1}}`: OTP code (6 digits)
-- `{{2}}`: Expiry minutes (5)
+- Note: Expiry time (5 minutes) is hardcoded in the template, not a parameter
 
 **Status**: Must be approved by Meta before use
+
+**Note**: The template name is configurable via `WA_OTP_TEMPLATE_NAME` environment variable (default: `gantify_authentication`)
 
 ### How to Create Template in Meta Business Manager:
 
@@ -348,9 +350,9 @@ This code will expire in {{2}} minutes. Please do not share this code with anyon
 2. Navigate to: **WhatsApp Manager** → **Message Templates**
 3. Click **Create Template**
 4. Fill in:
-   - **Template Name**: `authentication_otp`
+   - **Template Name**: `gantify_authentication`
    - **Category**: Authentication
-   - **Language**: English
+   - **Language**: English (US)
    - **Body**: (paste content above)
 5. Submit for approval
 6. Wait 24-48 hours for Meta approval
@@ -380,6 +382,7 @@ This code will expire in {{2}} minutes. Please do not share this code with anyon
 | `OTP has expired` | 400 | > 5 minutes | Request new OTP |
 | `Email already registered` | 400 | Duplicate email | Use different email |
 | `Failed to send OTP via WhatsApp` | 500 | WhatsApp API error | Check WA credentials |
+| `Template name does not exist` | 500 | Template not found/approved | See troubleshooting below |
 
 ---
 
@@ -389,6 +392,8 @@ This code will expire in {{2}} minutes. Please do not share this code with anyon
 # WhatsApp Configuration (for OTP sending)
 WA_ACCESS_TOKEN=your_whatsapp_access_token
 WA_PHONE_NUMBER_ID=your_phone_number_id
+WA_OTP_TEMPLATE_NAME=gantify_authentication  # Optional: Default is 'gantify_authentication'
+WA_OTP_TEMPLATE_LANGUAGE=en_US                # Optional: Default is 'en_US' (English US)
 
 # JWT Configuration (for token generation)
 JWT_SECRET=your-secret-key-change-in-production
@@ -397,6 +402,8 @@ JWT_EXPIRES_IN=7d
 # Database
 DATABASE_URL=postgresql://user:password@localhost:5432/gantify
 ```
+
+**Note:** If your WhatsApp template has a different name, set `WA_OTP_TEMPLATE_NAME` to match your actual template name in Meta Business Manager.
 
 ---
 
@@ -435,9 +442,57 @@ Search for "Center sign-up" to see interactive documentation with "Try it out" f
 
 ---
 
+## Troubleshooting WhatsApp Template Errors
+
+### Error: `(#132001) Template name does not exist in the translation`
+
+This error means the WhatsApp template doesn't exist or isn't approved in your Meta Business Manager account.
+
+**Solution Steps:**
+
+1. **Check Template Status in Meta Business Manager:**
+   - Go to [Meta Business Suite](https://business.facebook.com/)
+   - Navigate to: **WhatsApp Manager** → **Message Templates**
+   - Look for template named `authentication_otp` (or your custom name)
+   - Check status: Should be **"Approved"** (not "Pending" or "Rejected")
+
+2. **Verify Template Name:**
+   - Template names are **case-sensitive**
+   - Default template name: `gantify_authentication`
+   - Check exact spelling matches your template in Meta Business Manager
+   - If your template has a different name, set it in `.env`:
+     ```bash
+     WA_OTP_TEMPLATE_NAME=your_actual_template_name
+     ```
+
+3. **Create Template if Missing:**
+   - If template doesn't exist, create it following the guide above (lines 324-356)
+   - Template name: `authentication_otp`
+   - Category: **Authentication**
+   - Language: **English**
+   - Body: `Your verification code is {{1}}. This code will expire in {{2}} minutes.`
+   - Submit for approval (takes 24-48 hours)
+
+4. **Check Template Language:**
+   - If using a different language, set `WA_OTP_TEMPLATE_LANGUAGE` in `.env`
+   - Example: `WA_OTP_TEMPLATE_LANGUAGE=ms` for Malay
+
+5. **Verify WhatsApp API Credentials:**
+   - Ensure `WA_ACCESS_TOKEN` and `WA_PHONE_NUMBER_ID` are correct
+   - Token should have permissions to send messages
+
+**Quick Test:**
+```bash
+# Check if template name is correct
+echo $WA_OTP_TEMPLATE_NAME  # Should output: authentication_otp (or your template name)
+```
+
+---
+
 ## Support
 
 For issues or questions:
 - Check logs: `npm run dev` shows detailed console logs
 - Test endpoints: Use Swagger UI or cURL examples above
 - Database issues: Check Prisma schema and run `npx prisma studio`
+- WhatsApp template issues: See troubleshooting section above

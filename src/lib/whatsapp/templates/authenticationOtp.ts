@@ -1,9 +1,10 @@
+import 'dotenv/config';
 import whatsappClient from '../client';
 import { WhatsAppResponse, TemplateResponseData } from '../types';
 
 interface AuthenticationOtpParams {
   otpCode: string;
-  expiryMinutes?: string;
+  expiryMinutes?: string; // Not used in template, kept for backward compatibility
 }
 
 /**
@@ -11,7 +12,7 @@ interface AuthenticationOtpParams {
  * @param phoneNumber - Recipient phone number
  * @param params - Template parameters
  * @param params.otpCode - OTP code to send
- * @param params.expiryMinutes - OTP expiry time in minutes (optional, default: 5)
+ * @param params.expiryMinutes - Not used (expiry is hardcoded in template)
  * @returns Response with success status and data
  */
 export async function sendAuthenticationOtp(
@@ -28,16 +29,24 @@ export async function sendAuthenticationOtp(
       throw new Error('OTP code is required');
     }
 
-    // Default expiry to 5 minutes if not provided
-    const expiryMinutes = params.expiryMinutes || '5';
+    // Get template name from environment variable or use default
+    const templateName = process.env.WA_OTP_TEMPLATE_NAME || 'gantify_authentication';
+    const templateLanguage = process.env.WA_OTP_TEMPLATE_LANGUAGE || 'en_US';
 
-    // Build template components based on your WhatsApp template structure
+    // Build template components - body and button both need OTP code parameter
     const components = [
       {
         type: 'body' as const,
         parameters: [
-          { type: 'text' as const, text: params.otpCode },
-          { type: 'text' as const, text: expiryMinutes }
+          { type: 'text' as const, text: params.otpCode }
+        ]
+      },
+      {
+        type: 'button' as const,
+        sub_type: 'url' as const,
+        index: 0,
+        parameters: [
+          { type: 'text' as const, text: params.otpCode }
         ]
       }
     ];
@@ -48,8 +57,8 @@ export async function sendAuthenticationOtp(
       to: phoneNumber,
       type: 'template' as const,
       template: {
-        name: 'authentication_otp', // Update this to match your actual template name in Meta
-        language: { code: 'en' },
+        name: templateName,
+        language: { code: templateLanguage },
         components: components
       }
     };
@@ -66,16 +75,35 @@ export async function sendAuthenticationOtp(
       data: {
         messageId: response.messages?.[0]?.id,
         recipient: phoneNumber,
-        templateName: 'authentication_otp',
+        templateName: templateName,
         timestamp: new Date().toISOString()
       }
     };
 
   } catch (error) {
-    console.error('Error sending authentication OTP:', error instanceof Error ? error.message : 'Unknown error');
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Provide helpful error message for template not found
+    if (errorMessage.includes('132001') || errorMessage.includes('Template name does not exist')) {
+      const templateName = process.env.WA_OTP_TEMPLATE_NAME || 'gantify_authentication';
+      console.error('WhatsApp Template Error:', {
+        error: errorMessage,
+        templateName: templateName,
+        help: 'Template does not exist or is not approved in Meta Business Manager. Please:',
+        steps: [
+          '1. Go to Meta Business Suite → WhatsApp Manager → Message Templates',
+          '2. Check if template exists and is approved',
+          '3. Verify template name matches exactly (case-sensitive)',
+          '4. Set WA_OTP_TEMPLATE_NAME in .env if using different name',
+          '5. Wait 24-48 hours if template is pending approval'
+        ]
+      });
+    }
+    
+    console.error('Error sending authentication OTP:', errorMessage);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: errorMessage
     };
   }
 }
